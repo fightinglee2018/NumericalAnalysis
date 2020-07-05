@@ -1,8 +1,12 @@
 # encoding: utf-8
 
-"""
+r"""
 Solving the 2-D Laplace's equation by the Finite Difference Method 
 Numerical scheme used is a second order central difference in space (5-point difference)
+
+PDE:
+    u_xx + u_yy + \mu u = 0
+    \partial u /  \partial \nu = g
 """
 
 
@@ -21,15 +25,23 @@ x = np.linspace(0, 2, nx)             # Range of x(0,2) and specifying the grid 
 y = np.linspace(0, 2, ny)             # Range of x(0,2) and specifying the grid points
 # print(dx)
 
+mu = 0.5
+g = 1
+
 # Inital Conditions
 p = np.zeros((ny, nx))
 pn = np.zeros((ny, nx))
 
 # Boundary Conditions
-p[:, 0] = 0.0                         # Dirichlet condition
-p[:, nx-1] = y                        # Dirichlet condition
-p[0, :] = p[1, :]                     # Neumann condition
-p[ny-1, :] = p[ny-2, :]               # Neumann condition
+# p[:, 0] = 0.0                         # Dirichlet condition
+# p[:, nx-1] = y                        # Dirichlet condition
+# p[0, :] = p[1, :]                     # Neumann condition
+# p[ny-1, :] = p[ny-2, :]               # Neumann condition
+
+p[:, 0] = p[:, 1] + g * dx                         # Neumann condition
+p[:, nx-1] = p[:, nx-2] + g * dx                        # Neumann condition
+p[0, :] = p[1, :] + g * dy                     # Neumann condition
+p[ny-1, :] = p[ny-2, :] + g * dy               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 # j = np.arange(1, nx-1)
@@ -37,14 +49,18 @@ p[ny-1, :] = p[ny-2, :]               # Neumann condition
 
 for it in range(niter):
     pn = p.copy()
-    p[1:ny-1, 1:nx-1] = ((pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2])*dx*dx + (pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1])*dy*dy) / (2.0 * (dx*dx + dy*dy))
-    # p[i, j] = ((pn[i, j+1] + pn[i, j-1])*dx*dx + (pn[i+1, j] + pn[i-1, j])*dy*dy) / (2.0 * (dx*dx + dy*dy))
-    # p[1:ny-1, 1:nx-1] = (pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2] + pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1]) / 4   # Jacobi iter
+    # p[1:ny-1, 1:nx-1] = ((pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2])*dx*dx + (pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1])*dy*dy) / (2.0 * (dx*dx + dy*dy))
+    p[1:ny-1, 1:nx-1] = (pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2] + pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1]) / (4 + mu * dx * dx) # dx = dy
     # Boundary condition
-    p[:, 0] = 0.0                      # Dirichlet condition
-    p[:, nx-1] = y                     # Dirichlet condition
-    p[0, :] = p[1, :]                  # Neumann condition
-    p[ny-1, :] = p[ny-2, :]            # Neumann condition
+    # p[:, 0] = 0.0                      # Dirichlet condition
+    # p[:, nx-1] = y                     # Dirichlet condition
+    # p[0, :] = p[1, :]                  # Neumann condition
+    # p[ny-1, :] = p[ny-2, :]            # Neumann condition
+
+    p[:, 0] = p[:, 1] + g * dx                         # Neumann condition
+    p[:, nx-1] = p[:, nx-2] + g * dx                        # Neumann condition
+    p[0, :] = p[1, :] + g * dy                     # Neumann condition
+    p[ny-1, :] = p[ny-2, :] + g * dy               # Neumann condition
 
 # print(p)
 
