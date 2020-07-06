@@ -19,14 +19,18 @@ from mpl_toolkits.mplot3d import Axes3D
 nx = 60                               # Number of steps in space(x)
 ny = 60                               # Number of steps in space(y)
 niter = 10000                         # Number of iterations 
-dx = 2.0 / (nx - 1)                   # Width of space step(x)
-dy = 2.0 / (ny - 1)                   # Width of space step(x)
-x = np.linspace(0, 2, nx)             # Range of x(0,2) and specifying the grid points
-y = np.linspace(0, 2, ny)             # Range of x(0,2) and specifying the grid points
+dx = 4.0 / (nx - 1)                   # Width of space step(x)
+dy = 4.0 / (ny - 1)                   # Width of space step(x)
+x = np.linspace(-2, 2, nx)             # Range of x(0,2) and specifying the grid points
+y = np.linspace(-2, 2, ny)             # Range of x(0,2) and specifying the grid points
 # print(dx)
 
-mu = 0.5
-g = 1
+mu = 1
+# g = 1
+g1 = np.sin(2*x)
+g2 = np.sin(2*y)
+g3 = np.sin(2*x)
+g4 = np.sin(2*y)
 
 # Inital Conditions
 p = np.zeros((ny, nx))
@@ -38,10 +42,10 @@ pn = np.zeros((ny, nx))
 # p[0, :] = p[1, :]                     # Neumann condition
 # p[ny-1, :] = p[ny-2, :]               # Neumann condition
 
-p[:, 0] = p[:, 1] + g * dx                         # Neumann condition
-p[:, nx-1] = p[:, nx-2] + g * dx                        # Neumann condition
-p[0, :] = p[1, :] + g * dy                     # Neumann condition
-p[ny-1, :] = p[ny-2, :] + g * dy               # Neumann condition
+p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
+p[:, nx-1] = p[:, nx-2] + g4 * dx                        # Neumann condition
+p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
+p[ny-1, :] = p[ny-2, :] + g3 * dy               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 # j = np.arange(1, nx-1)
@@ -57,10 +61,10 @@ for it in range(niter):
     # p[0, :] = p[1, :]                  # Neumann condition
     # p[ny-1, :] = p[ny-2, :]            # Neumann condition
 
-    p[:, 0] = p[:, 1] + g * dx                         # Neumann condition
-    p[:, nx-1] = p[:, nx-2] + g * dx                        # Neumann condition
-    p[0, :] = p[1, :] + g * dy                     # Neumann condition
-    p[ny-1, :] = p[ny-2, :] + g * dy               # Neumann condition
+    p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
+    p[:, nx-1] = p[:, nx-2] + g4 * dx                        # Neumann condition
+    p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
+    p[ny-1, :] = p[ny-2, :] + g3 * dy               # Neumann condition
 
 # print(p)
 
