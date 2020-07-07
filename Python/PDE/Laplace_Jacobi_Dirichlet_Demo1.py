@@ -103,7 +103,7 @@ ax = plt.axes(projection='3d')
 x, y = np.meshgrid(x, y)
 
 ax.plot_surface(x, y, u, cmap='rainbow')        # plot u
-ax.plot_surface(x, y, p, cmap='rainbow')        # plot p
+# ax.plot_surface(x, y, p, cmap='rainbow')        # plot p
 
 plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
 ax.set_xlabel("Spatial co-ordinate (x) ")
