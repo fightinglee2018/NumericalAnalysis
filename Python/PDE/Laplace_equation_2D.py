@@ -27,9 +27,9 @@ pn = np.zeros((ny, nx))
 
 # Boundary Conditions
 p[:, 0] = 0.0                         # Dirichlet condition
-p[:, nx-1] = y                        # Dirichlet condition
+p[:, -1] = y                        # Dirichlet condition
 p[0, :] = p[1, :]                     # Neumann condition
-p[ny-1, :] = p[ny-2, :]               # Neumann condition
+p[-1, :] = p[-2, :]               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 # j = np.arange(1, nx-1)
@@ -37,14 +37,13 @@ p[ny-1, :] = p[ny-2, :]               # Neumann condition
 
 for it in range(niter):
     pn = p.copy()
-    p[1:ny-1, 1:nx-1] = ((pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2])*dx*dx + (pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1])*dy*dy) / (2.0 * (dx*dx + dy*dy))
-    # p[i, j] = ((pn[i, j+1] + pn[i, j-1])*dx*dx + (pn[i+1, j] + pn[i-1, j])*dy*dy) / (2.0 * (dx*dx + dy*dy))
-    # p[1:ny-1, 1:nx-1] = (pn[1:ny-1, 2:nx] + pn[1:ny-1, 0:nx-2] + pn[2:ny, 1:nx-1] + pn[0:ny-2, 1:nx-1]) / 4   # Jacobi iter
+    p[1:-1, 1:-1] = ((pn[1:-1, 2:] + pn[1:-1, 0:-2])*dx*dx + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dy*dy) / (2.0 * (dx*dx + dy*dy))
+    # p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / 4   # Jacobi iter
     # Boundary condition
     p[:, 0] = 0.0                      # Dirichlet condition
-    p[:, nx-1] = y                     # Dirichlet condition
+    p[:, -1] = y                     # Dirichlet condition
     p[0, :] = p[1, :]                  # Neumann condition
-    p[ny-1, :] = p[ny-2, :]            # Neumann condition
+    p[-1, :] = p[-2, :]            # Neumann condition
 
 # print(p)
 
