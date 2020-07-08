@@ -32,16 +32,12 @@ g = 1
 p = np.zeros((ny, nx))
 pn = np.zeros((ny, nx))
 
-# Boundary Conditions
-# p[:, 0] = 0.0                         # Dirichlet condition
-# p[:, nx-1] = y                        # Dirichlet condition
-# p[0, :] = p[1, :]                     # Neumann condition
-# p[ny-1, :] = p[ny-2, :]               # Neumann condition
+Boundary Conditions
+p[:, 0] = 0.0                         # Dirichlet condition
+p[:, nx-1] = y                        # Dirichlet condition
+p[0, :] = p[1, :]                     # Neumann condition
+p[ny-1, :] = p[ny-2, :]               # Neumann condition
 
-p[:, 0] = p[:, 1] + g * dx                         # Neumann condition
-p[:, nx-1] = p[:, nx-2] + g * dx                        # Neumann condition
-p[0, :] = p[1, :] + g * dy                     # Neumann condition
-p[ny-1, :] = p[ny-2, :] + g * dy               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 # j = np.arange(1, nx-1)
