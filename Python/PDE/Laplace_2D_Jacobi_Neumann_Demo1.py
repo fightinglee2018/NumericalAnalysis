@@ -50,24 +50,24 @@ p = np.zeros((ny, nx))
 pn = np.zeros((ny, nx))
 
 # Boundary Conditions
-# p[:, 0] = f2                         # Dirichlet condition
-# p[:, -1] = f4                        # Dirichlet condition
-# p[0, :] = f1                     # Dirichlet condition
-# p[-1, :] = f3               # Dirichlet condition
+p[:, 0] = f2                         # Dirichlet condition
+p[:, -1] = f4                        # Dirichlet condition
+p[0, :] = f1                     # Dirichlet condition
+p[-1, :] = f3               # Dirichlet condition
 
 # p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
 # p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
 # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
 # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
-p[0, 0] = p[1, 1] + g1[1] * dy                         # Neumann condition
-p[0, -1] = p[1, -2] + g4[-1] * dx                        # Neumann condition
-p[-1, 0] = p[-2, 1] + g2[1] * dx
-p[-1, -1] = p[-2, -2] + g3[-1] * dy
-p[1:-1, 0] = p[1:-1, 1] + g2[1:-1] * dx                         # Neumann condition
-p[1:-1, -1] = p[1:-1, -2] + g4[1:-1] * dx                        # Neumann condition
-p[0, 1:-1] = p[1, 1:-1] + g1[1:-1] * dy                     # Neumann condition
-p[-1, 1:-1] = p[-2, 1:-1] + g3[1:-1] * dy               # Neumann condition
+# p[0, 0] = p[1, 1] + g1[1] * dy                         # Neumann condition
+# p[0, -1] = p[1, -2] + g4[-1] * dx                        # Neumann condition
+# p[-1, 0] = p[-2, 1] + g2[1] * dx
+# p[-1, -1] = p[-2, -2] + g3[-1] * dy
+# p[1:-1, 0] = p[1:-1, 1] + g2[1:-1] * dx                         # Neumann condition
+# p[1:-1, -1] = p[1:-1, -2] + g4[1:-1] * dx                        # Neumann condition
+# p[0, 1:-1] = p[1, 1:-1] + g1[1:-1] * dy                     # Neumann condition
+# p[-1, 1:-1] = p[-2, 1:-1] + g3[1:-1] * dy               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 e = 0.0
@@ -76,24 +76,24 @@ for it in range(niter):
     p[1:-1, 1:-1] = ((pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
     # p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
     # Boundary condition
-    # p[:, 0] = f2                         # Dirichlet condition
-    # p[:, -1] = f4                        # Dirichlet condition
-    # p[0, :] = f1                     # Dirichlet condition
-    # p[-1, :] = f3               # Dirichlet condition
+    p[:, 0] = f2                         # Dirichlet condition
+    p[:, -1] = f4                        # Dirichlet condition
+    p[0, :] = f1                     # Dirichlet condition
+    p[-1, :] = f3               # Dirichlet condition
 
     # p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
     # p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
     # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
     # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
-    p[0, 0] = p[1, 1]
-    p[0, -1] = p[1, -2]
-    p[-1, 0] = p[-2, 1]
-    p[-1, -1] = p[-2, -2]
-    p[1:-1, 0] = p[1:-1, 1] + g2[1:-1] * dx                         # Neumann condition
-    p[1:-1, -1] = p[1:-1, -2] + g4[1:-1] * dx                        # Neumann condition
-    p[0, 1:-1] = p[1, 1:-1] + g1[1:-1] * dy                     # Neumann condition
-    p[-1, 1:-1] = p[-2, 1:-1] + g3[1:-1] * dy               # Neumann condition
+    # p[0, 0] = p[1, 1]
+    # p[0, -1] = p[1, -2]
+    # p[-1, 0] = p[-2, 1]
+    # p[-1, -1] = p[-2, -2]
+    # p[1:-1, 0] = p[1:-1, 1] + g2[1:-1] * dx                         # Neumann condition
+    # p[1:-1, -1] = p[1:-1, -2] + g4[1:-1] * dx                        # Neumann condition
+    # p[0, 1:-1] = p[1, 1:-1] + g1[1:-1] * dy                     # Neumann condition
+    # p[-1, 1:-1] = p[-2, 1:-1] + g3[1:-1] * dy               # Neumann condition
 
     # is convergence
     e = np.abs(p - pn).max()
@@ -112,7 +112,7 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
 ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
 # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
