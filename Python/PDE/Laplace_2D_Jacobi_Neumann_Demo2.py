@@ -58,9 +58,9 @@ pn = np.zeros((ny, nx))
 # p[0, :] = f1                     # Dirichlet condition
 # p[-1, :] = f3               # Dirichlet condition
 
-p[:, 0] = p[:, 1]                         # Neumann condition
+p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
 p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
-p[0, :] = p[1, :]                     # Neumann condition
+p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
 p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
 # p[0, 0] = p[1, 1] + g1 * dy                         # Neumann condition
@@ -116,9 +116,9 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
-# ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
-ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
+ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
+# ax.plot_surface(x, y, p-u, cmap='rainbow')          # plot error
 
 plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
 ax.set_xlabel("Spatial co-ordinate (x) ")

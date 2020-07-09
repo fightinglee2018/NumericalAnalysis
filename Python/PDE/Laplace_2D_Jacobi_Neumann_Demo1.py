@@ -51,14 +51,14 @@ pn = np.zeros((ny, nx))
 
 # Boundary Conditions
 p[:, 0] = f2                         # Dirichlet condition
-p[:, -1] = f4                        # Dirichlet condition
+# p[:, -1] = f4                        # Dirichlet condition
 p[0, :] = f1                     # Dirichlet condition
-p[-1, :] = f3               # Dirichlet condition
+# p[-1, :] = f3               # Dirichlet condition
 
 # p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
-# p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
+p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
 # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
-# p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
+p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
 # p[0, 0] = p[1, 1] + g1[1] * dy                         # Neumann condition
 # p[0, -1] = p[1, -2] + g4[-1] * dx                        # Neumann condition
@@ -73,18 +73,19 @@ p[-1, :] = f3               # Dirichlet condition
 e = 0.0
 for it in range(niter):
     pn = p.copy()
-    p[1:-1, 1:-1] = ((pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
-    # p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
+    # p[1:-1, 1:-1] = ((pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
+    p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
+    # p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
     # Boundary condition
     p[:, 0] = f2                         # Dirichlet condition
-    p[:, -1] = f4                        # Dirichlet condition
+    # p[:, -1] = f4                        # Dirichlet condition
     p[0, :] = f1                     # Dirichlet condition
-    p[-1, :] = f3               # Dirichlet condition
+    # p[-1, :] = f3               # Dirichlet condition
 
     # p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
-    # p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
+    p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
     # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
-    # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
+    p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
     # p[0, 0] = p[1, 1]
     # p[0, -1] = p[1, -2]
