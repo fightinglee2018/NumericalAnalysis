@@ -58,19 +58,21 @@ pn = np.zeros((ny, nx))
 # p[0, :] = f1                     # Dirichlet condition
 # p[-1, :] = f3               # Dirichlet condition
 
-p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
-p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
-p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
-p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
+# p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
+# p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
+# p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
+# p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
-# p[0, 0] = p[1, 1] + g1 * dy                         # Neumann condition
-# p[0, -1] = p[1, -2] + g4 * dx                        # Neumann condition
-# p[-1, 0] = p[-2, 1] + g2 * dx
-# p[-1, -1] = p[-2, -2] + g3 * dy
-# p[1:-1, 0] = p[1:-1, 1] + g2 * dx                         # Neumann condition
-# p[1:-1, -1] = p[1:-1, -2] + g4 * dx                        # Neumann condition
-# p[0, 1:-1] = p[1, 1:-1] + g1 * dy                     # Neumann condition
-# p[-1, 1:-1] = p[-2, 1:-1] + g3 * dy               # Neumann condition
+p[0, 0] = p[1, 1]                         # Neumann condition
+# p[0, -1] = p[1, -1]                        # Neumann condition
+# p[-1, 0] = p[-1, 1]
+p[0, -1] = (p[1, -1] + p[0, -2] - g1 * dy + g4 * dx) * 2 / (4 + mu)
+p[-1, 0] = (p[-1, 1] + p[-2, 0] - g2 * dx + g3 * dy) * 2 / (4 + mu)
+p[-1, -1] = p[-2, -2]
+p[1:-1, 0] = (2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2 * dx) / (4 + mu)                   # Neumann condition
+p[1:-1, -1] = (2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4 * dx) / (4 + mu)               # Neumann condition
+p[0, 1:-1] = (2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1 * dy) / (4 + mu)                   # Neumann condition
+p[-1, 1:-1] = (2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3 * dy) / (4 + mu)               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 e = 0.0
@@ -84,19 +86,29 @@ for it in range(niter):
     # p[0, :] = f1                     # Dirichlet condition
     # p[-1, :] = f3               # Dirichlet condition
 
-    p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
-    p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
-    p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
-    p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
+    # p[:, 0] = p[:, 1] + g2 * dx                         # Neumann condition
+    # p[:, -1] = p[:, -2] + g4 * dx                        # Neumann condition
+    # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
+    # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
+    p[0, 0] = p[1, 1]                         # Neumann condition
+    # p[0, -1] = (2 * p[1, -1] + p[0, -2] + p[0, -1] - 2 * g1 * dy) / (4 + mu)                        # Neumann condition
+    # p[-1, 0] = (2 * p[-1, 1] + p[-2, 0] + p[-1, 0] - 2 * g2 * dx) / (4 + mu)
+    p[0, -1] = (p[1, -1] + p[0, -2] - g1 * dy + g4 * dx) * 2 / (4 + mu)
+    p[-1, 0] = (p[-1, 1] + p[-2, 0] - g2 * dx + g3 * dy) * 2 / (4 + mu)
+    # p[0, -1] = p[1, -1]
+    # p[-1, 0] = p[-1, 1]
+    p[-1, -1] = p[-2, -2]
+    p[1:-1, 0] = (2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2 * dx) / (4 + mu)                   # Neumann condition
+    p[1:-1, -1] = (2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4 * dx) / (4 + mu)               # Neumann condition
+    p[0, 1:-1] = (2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1 * dy) / (4 + mu)                   # Neumann condition
+    p[-1, 1:-1] = (2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3 * dy) / (4 + mu)               # Neumann condition
     # p[0, 0] = p[1, 1]
-    # p[0, -1] = p[1, -2] + g4 * dx                        # Neumann condition
-    # p[-1, 0] = p[-2, 1] + g3 * dy                         # Neumann condition
+    # p[0, -1] = p[1, -1]
+    # p[-1, 0] = p[-1, 1]
     # p[-1, -1] = p[-2, -2]
-    # p[1:-1, 0] = p[1:-1, 1] + g2 * dx                         # Neumann condition
-    # p[1:-1, -1] = p[1:-1, -2] + g4 * dx                        # Neumann condition
-    # p[0, 1:-1] = p[1, 1:-1] + g1 * dy                     # Neumann condition
-    # p[-1, 1:-1] = p[-2, 1:-1] + g3 * dy               # Neumann condition
+    # p[0, -1] = (2 * p[1, -1] + p[0, -2] + p[0, -1] - 2 * g1 * dy) / (4 + mu)                        # Neumann condition
+    # p[-1, 0] = (2 * p[-1, 1] + p[-2, 0] + p[-1, 0] - 2 * g2 * dx) / (4 + mu)
 
     # is convergence
     e = np.abs(p - pn).max()
@@ -104,10 +116,11 @@ for it in range(niter):
     #     break
 
 # print(p)
-print(e)
+# print(e)
 
 # compute error
-error = np.max(np.abs(p - u))
+# error = np.max(np.abs(p - u))
+error = np.sqrt(np.sum(np.square(p - u)) / (nx*ny))
 print(error)
 # print(p - u)
 
@@ -116,9 +129,9 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
-ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
-# ax.plot_surface(x, y, p-u, cmap='rainbow')          # plot error
+# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+# ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
+ax.plot_surface(x, y, p-u, cmap='rainbow')          # plot error
 
 plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
 ax.set_xlabel("Spatial co-ordinate (x) ")
