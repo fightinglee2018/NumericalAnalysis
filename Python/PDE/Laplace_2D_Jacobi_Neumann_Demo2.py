@@ -116,7 +116,7 @@ for it in range(niter):
     #     break
 
 # print(p)
-# print(e)
+print(e)
 
 # compute error
 # error = np.max(np.abs(p - u))

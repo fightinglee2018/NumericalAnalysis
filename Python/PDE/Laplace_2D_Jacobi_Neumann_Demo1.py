@@ -5,11 +5,11 @@ Solving the 2-D Laplace's equation by the Finite Difference Method
 Numerical scheme used is a second order central difference in space (5-point difference)
 
 PDE:
-    u_xx + u_yy + \mu u = 0             0<x<1, 0<y<1
+    u_xx + u_yy + \mu u = 3sin(x+y)             0<x<1, 0<y<1
     \partial u /  \partial \nu = g      0<=x<=1, 0<=y<=1
 
 exact solution:
-    u(x, y) = sin(x+y)
+    u(x, y) = sin(x+y)      \mu = 1
 """
 
 
@@ -19,8 +19,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # global parameters
-nx = 100                               # Number of steps in space(x)
-ny = 100                               # Number of steps in space(y)
+nx = 64                               # Number of steps in space(x)
+ny = 64                               # Number of steps in space(y)
 niter = 10000                         # Number of iterations 
 dx = 1.0 / (nx - 1)                   # Width of space step(x)
 dy = 1.0 / (ny - 1)                   # Width of space step(x)
@@ -28,8 +28,11 @@ x = np.linspace(0, 1, nx)             # Range of x(0,2) and specifying the grid 
 y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid points
 # print(dx)
 
-mu = -0.0
-f0 = 1
+mu = 1.0
+f = np.zeros((ny, nx))
+for i in range(ny):
+    for j in range(nx):
+        f[i, j] = 3 * np.sin(x[j] + y[i])
 f1 = np.sin(x)
 f2 = np.sin(y)
 f3 = np.sin(x+1)
@@ -39,6 +42,10 @@ g1 = np.cos(x)
 g2 = np.cos(y)
 g3 = np.cos(x+1)
 g4 = np.cos(y+1)
+# g1 = np.sin(x)
+# g2 = np.sin(y)
+# g3 = np.sin(x+1)
+# g4 = np.sin(y+1)
 
 # exact solution
 u = np.zeros((ny, nx))
@@ -60,10 +67,15 @@ pn = np.zeros((ny, nx))
 # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
 # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
-p[0, 0] = p[1, 1] + g1[1] * dy                         # Neumann condition
-p[0, -1] = p[1, -2] + g4[-1] * dx                        # Neumann condition
-p[-1, 0] = p[-2, 1] + g2[1] * dx
-p[-1, -1] = p[-2, -2] + g3[-1] * dy
+# p[0, 0] = p[1, 1] + g1[1] * dy                         # Neumann condition
+# p[0, -1] = p[1, -2] + g4[-1] * dx                        # Neumann condition
+# p[-1, 0] = p[-2, 1] + g2[1] * dx
+# p[-1, -1] = p[-2, -2] + g3[-1] * dy
+p[0, 0] = (p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu)
+# print(p[0, 0])
+p[0, -1] = (p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu)
+p[-1, 0] = (p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu)
+p[-1, -1] = (p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu)
 p[1:-1, 0] = (2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu)                   # Neumann condition
 p[1:-1, -1] = (2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu)               # Neumann condition
 p[0, 1:-1] = (2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu)                   # Neumann condition
@@ -74,7 +86,7 @@ e = 0.0
 for it in range(niter):
     pn = p.copy()
     # p[1:-1, 1:-1] = ((pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
-    p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
+    p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
     # p[1:-1, 1:-1] = (pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
     # Boundary condition
     # p[:, 0] = f2                         # Dirichlet condition
@@ -87,14 +99,29 @@ for it in range(niter):
     # p[0, :] = p[1, :] + g1 * dy                     # Neumann condition
     # p[-1, :] = p[-2, :] + g3 * dy               # Neumann condition
 
-    p[0, 0] = p[1, 1]                         # Neumann condition
-    p[0, -1] = p[1, -2]                        # Neumann condition
-    p[-1, 0] = p[-2, 1]
-    p[-1, -1] = p[-2, -2]
+    # p[0, 0] = p[1, 1]                         # Neumann condition
+    # p[0, -1] = p[1, -2]                        # Neumann condition
+    # p[-1, 0] = p[-2, 1]
+    # p[-1, -1] = p[-2, -2]
+    p[0, 0] = (p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu)
+    # print(p[0, 0])
+    p[0, -1] = (p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu)
+    p[-1, 0] = (p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu)
+    p[-1, -1] = (p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu)
     p[1:-1, 0] = (2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu)                   # Neumann condition
     p[1:-1, -1] = (2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu)               # Neumann condition
     p[0, 1:-1] = (2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu)                   # Neumann condition
     p[-1, 1:-1] = (2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu)               # Neumann condition
+
+    # p[0, 0] = (p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu)
+    # # print(p[0, 0])
+    # p[0, -1] = (p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu)
+    # p[-1, 0] = (p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu)
+    # p[-1, -1] = (p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu)
+    # p[1:-1, 0] = (2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu)                   # Neumann condition
+    # p[1:-1, -1] = (2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] - 2 * g4[1:-1] * dx) / (4 + mu)               # Neumann condition
+    # p[0, 1:-1] = (2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu)                   # Neumann condition
+    # p[-1, 1:-1] = (2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] - 2 * g3[1:-1] * dy) / (4 + mu)               # Neumann condition
 
     # is convergence
     e = np.abs(p - pn).max()
@@ -106,6 +133,7 @@ print(e)
 
 # compute error
 error = np.max(np.abs(p - u))
+# error = np.sqrt(np.sum(np.square(p - u)) / (nx*ny))
 print(error)
 
 # Plot the solution
