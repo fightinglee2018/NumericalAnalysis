@@ -5,11 +5,15 @@ Solving the 2-D Laplace's equation by the Finite Difference Method
 Numerical scheme used is a second order central difference in space (5-point difference)
 
 PDE:
-    u_xx + u_yy + \mu u = 0             0<x<1, 0<y<1
-    \partial u /  \partial \nu = g      0<=x<=1, 0<=y<=1
+    -(u_xx + u_yy) + \mu u = 0             0<x<1, 0<y<1
+    BCS:
+        \partial u /  \partial \nu = g      0<=x<=1, 0<=y<=1
+    or:
+        u_y(x, 0) = sin(x), u_y(x, 1) = sin(x+1)    0<=x<=1
+        u_x(0, y) = sin(y), u_x(1, y) = sin(y+1)    0<=y<=1
 
 exact solution:
-    u(x, y) = sin(x+y)      \mu = 1
+    u(x, y) = sin(x+y)      \mu = -2
 """
 
 
@@ -30,9 +34,6 @@ y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid 
 
 mu = -2.0
 f = np.zeros((ny, nx))
-# for i in range(ny):
-#     for j in range(nx):
-#         f[i, j] = 3 * np.sin(x[j] + y[i])
 f1 = np.sin(x)
 f2 = np.sin(y)
 f3 = np.sin(x+1)
@@ -46,7 +47,7 @@ g4 = np.cos(y+1)
 # exact solution
 u = np.zeros((ny, nx))
 for i in range(ny):
-    u[i, :] = np.sin(x + y[i]) - 2.7959438233048264
+    u[i, :] = np.sin(x + y[i])
 
 # Inital Conditions
 p = np.zeros((ny, nx))
@@ -107,7 +108,7 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
 ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
 # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
