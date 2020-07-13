@@ -35,8 +35,8 @@ y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid 
 mu = 1.0
 f = np.zeros((ny, nx))
 for i in range(ny):
-    for j in range(nx):
-        f[i, j] = 3 * np.sin(x[j] + y[i])
+    f[i, :] = 3 * np.sin(x + y[i])
+    # u[i, :] = np.ones(nx)
 f1 = np.sin(x)
 f2 = np.sin(y)
 f3 = np.sin(x+1)
@@ -47,10 +47,16 @@ g2 = np.cos(y)
 g3 = np.cos(x+1)
 g4 = np.cos(y+1)
 
+# g1 = np.zeros(nx)
+# g2 = np.zeros(ny)
+# g3 = np.zeros(nx)
+# g4 = np.zeros(ny)
+
 # exact solution
 u = np.zeros((ny, nx))
 for i in range(ny):
     u[i, :] = np.sin(x + y[i])
+    # u[i, :] = np.ones(nx)
 
 # Inital Conditions
 p = np.zeros((ny, nx))
@@ -62,36 +68,54 @@ pn = np.zeros((ny, nx))
 # p[0, :] = f1                     # Dirichlet condition
 # p[-1, :] = f3               # Dirichlet condition
 
-p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
-p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
-p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
-p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
-p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
-p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
-p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
-p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
+# p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
+# p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
+# p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
+# p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
+# p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
+# p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
+# p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
+# p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
+
+p[0, 0] = (f[0, 0] * dx * dx + (p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 - p[0, 0] * mu*dx * dx) / 4
+p[0, -1] = (f[0, -1] * dx * dx + (p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 - p[0, -1] * mu*dx * dx) / 4
+p[-1, 0] = (f[-1, 0] * dx * dx + (p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 - p[-1, 0] * mu*dx * dx) / 4
+p[-1, -1] = (f[-1, -1] * dx * dx + (p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 - p[-1, -1] * mu*dx * dx) / 4
+p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - p[1:-1, 0] * mu*dx * dx - 2 * g2[1:-1] * dx) / 4                   # Neumann condition
+p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] - p[1:-1, -1] * mu*dx * dx + 2 * g4[1:-1] * dx) / 4               # Neumann condition
+p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - p[0, 1:-1] * mu*dy*dy - 2 * g1[1:-1] * dy) / 4                   # Neumann condition
+p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] - p[-1, 1:-1] * mu*dy*dy + 2 * g3[1:-1] * dy) / 4 
 
 # Explicit iterative scheme with C.D in space (5-point difference)
 e = 0.0
 for it in range(niter):
     pn = p.copy()
-    p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx *dy*dy + (pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
+    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx *dy*dy + (pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
     # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
-    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
+    p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
     # Boundary condition
     # p[:, 0] = f2                         # Dirichlet condition
     # p[:, -1] = f4                        # Dirichlet condition
     # p[0, :] = f1                     # Dirichlet condition
     # p[-1, :] = f3               # Dirichlet condition
 
-    p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
-    p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
-    p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
-    p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
-    p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
-    p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
-    p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
-    p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
+    # p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
+    # p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
+    # p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
+    # p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
+    # p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
+    # p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
+    # p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
+    # p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
+
+    p[0, 0] = (f[0, 0] * dx * dx + (p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 - p[0, 0] * mu*dx * dx) / 4
+    p[0, -1] = (f[0, -1] * dx * dx + (p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 - p[0, -1] * mu*dx * dx) / 4
+    p[-1, 0] = (f[-1, 0] * dx * dx + (p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 - p[-1, 0] * mu*dx * dx) / 4
+    p[-1, -1] = (f[-1, -1] * dx * dx + (p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 - p[-1, -1] * mu*dx * dx) / 4
+    p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - p[1:-1, 0] * mu*dx * dx - 2 * g2[1:-1] * dx) / 4                   # Neumann condition
+    p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] - p[1:-1, -1] * mu*dx * dx + 2 * g4[1:-1] * dx) / 4               # Neumann condition
+    p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - p[0, 1:-1] * mu*dy*dy - 2 * g1[1:-1] * dy) / 4                   # Neumann condition
+    p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] - p[-1, 1:-1] * mu*dy*dy + 2 * g3[1:-1] * dy) / 4 
 
     # is convergence
     e = np.abs(p - pn).max()
@@ -111,7 +135,7 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
 ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
 # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
