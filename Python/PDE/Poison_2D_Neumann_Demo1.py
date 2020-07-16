@@ -106,9 +106,6 @@ for it in range(niter):
     #     break
 
 
-
-
-
 # print(p)
 print(e)
 
