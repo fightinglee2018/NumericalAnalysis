@@ -17,10 +17,12 @@ exact solution:
 """
 
 
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+# start = time.time()
 
 # global parameters
 nx = 20                               # Number of steps in space(x)
@@ -77,13 +79,15 @@ p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 *
 p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
 
 # Explicit iterative scheme with C.D in space (5-point difference)
+start = time.time()
 e = 0.0
+# it = 0
 for it in range(niter):
     pn = p.copy()
     # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx *dy*dy + (pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
     # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
     p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
-    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + p[1:-1, 2:] + p[1:-1, 0:-2] + p[2:, 1:-1] + p[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
+    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + p[1:-1, 2:] + p[1:-1, 0:-2] + p[2:, 1:-1] + p[0:-2, 1:-1] - mu*dx*dx*p[1:-1, 1:-1]) / 4 # dx = dy
     # Boundary condition
     # p[:, 0] = f2                         # Dirichlet condition
     # p[:, -1] = f4                        # Dirichlet condition
@@ -99,12 +103,14 @@ for it in range(niter):
     p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
     p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
 
-
     # is convergence
     e = np.abs(p - pn).max()
-    # if e < 1e-10:
-    #     break
+    if e < 1e-10:
+        print(it)
+        break
 
+end = time.time()
+print("Cost time: {}".format(end - start))
 
 # print(p)
 print(e)
@@ -112,7 +118,8 @@ print(e)
 # compute error
 # error = np.max(np.abs(p - u))
 error = np.sqrt(np.sum(np.square(p - u)) / (nx*ny))
-print(error)
+print("Error: {}".format(error))
+
 
 # Plot the solution
 fig = plt.figure()      # Define new 3D coordinate system
