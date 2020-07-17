@@ -23,9 +23,9 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # global parameters
-nx = 32                               # Number of steps in space(x)
-ny = 32                               # Number of steps in space(y)
-niter = 100000                         # Number of iterations 
+nx = 20                               # Number of steps in space(x)
+ny = 20                               # Number of steps in space(y)
+niter = 10000                         # Number of iterations 
 dx = 1.0 / (nx - 1)                   # Width of space step(x)
 dy = 1.0 / (ny - 1)                   # Width of space step(x)
 x = np.linspace(0, 1, nx)             # Range of x(0,2) and specifying the grid points
@@ -119,9 +119,9 @@ fig = plt.figure()      # Define new 3D coordinate system
 ax = plt.axes(projection='3d')
 
 x, y = np.meshgrid(x, y)
-# ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
-# ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
-ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
+ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
+ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
+# ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
 plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
 ax.set_xlabel("Spatial co-ordinate (x) ")
