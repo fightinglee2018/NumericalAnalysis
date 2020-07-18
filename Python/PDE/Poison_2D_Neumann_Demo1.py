@@ -83,7 +83,8 @@ start = time.time()
 e = 0.0
 # it = 0
 for it in range(niter):
-    pn = p.copy()
+    # pn = p.copy()
+    pn = np.copy(p)
     # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx *dy*dy + (pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
     # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
     p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
