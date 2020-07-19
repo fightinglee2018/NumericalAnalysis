@@ -22,7 +22,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# start = time.time()
 
 # global parameters
 nx = 20                               # Number of steps in space(x)
@@ -35,33 +34,40 @@ y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid 
 # print(dx)
 
 mu = 1.0
-f = np.zeros((ny, nx))
+F = np.zeros((ny, nx))
 for i in range(ny):
     for j in range(nx):
-        f[i, j] = 3 * np.sin(x[j] + y[i])
-f1 = np.sin(x)
-f2 = np.sin(y)
-f3 = np.sin(x+1)
-f4 = np.sin(y+1)
+        F[i, j] = 3 * np.sin(x[j] + y[i])
+
+# f = np.reshape(F, (nx*ny,))
+
+# f1 = np.sin(x)
+# f2 = np.sin(y)
+# f3 = np.sin(x+1)
+# f4 = np.sin(y+1)
 
 g1 = np.cos(x)
 g2 = np.cos(y)
 g3 = np.cos(x+1)
 g4 = np.cos(y+1)
 
-# exact solution
-u = np.zeros((ny, nx))
-for i in range(ny):
-    u[i, :] = np.sin(x + y[i])
+G = np.zeros((ny, nx))
+G[0, :] = np.cos(x)
+G[:, 0] = np.cos(y)
+G[-1, :] = np.cos(x+1)
+G[:, -1] = np.cos(y+1)
 
-F = np.reshape(f, (nx*ny,))
+# exact solution
+U = np.zeros((ny, nx))
+for i in range(ny):
+    U[i, :] = np.sin(x + y[i])
 
 
 # Inital Conditions
-p = np.zeros((ny, nx))
-pn = np.zeros((ny, nx))
+Un = np.zeros((ny, nx))
+# Pn = np.zeros((ny, nx))
 
-P = np.reshape(p, (nx*ny,))
+un = np.reshape(Un, (nx*ny,))
 
 # Boundary Conditions
 # p[:, 0] = f2                         # Dirichlet condition
@@ -69,71 +75,136 @@ P = np.reshape(p, (nx*ny,))
 # p[0, :] = f1                     # Dirichlet condition
 # p[-1, :] = f3               # Dirichlet condition
 
-p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
-p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
-p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
-p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
-p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
-p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
-p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
-p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
-
-# Explicit iterative scheme with C.D in space (5-point difference)
-start = time.time()
-e = 0.0
-# it = 0
-for it in range(niter):
-    # pn = p.copy()
-    pn = np.copy(p)
-    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx *dy*dy + (pn[1:-1, 2:] + pn[1:-1, 0:-2])*dy*dy + (pn[2:, 1:-1] + pn[0:-2, 1:-1])*dx*dx) / (2.0 * (dx*dx + dy*dy) + mu*dx*dx*dy*dy)
-    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1]) / (4 + mu * dx * dx) # dx = dy
-    p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + pn[1:-1, 2:] + pn[1:-1, 0:-2] + pn[2:, 1:-1] + pn[0:-2, 1:-1] - mu*dx*dx*pn[1:-1, 1:-1]) / 4 # dx = dy
-    # p[1:-1, 1:-1] = (f[1:-1, 1:-1] * dx*dx + p[1:-1, 2:] + p[1:-1, 0:-2] + p[2:, 1:-1] + p[0:-2, 1:-1] - mu*dx*dx*p[1:-1, 1:-1]) / 4 # dx = dy
-    # Boundary condition
-    # p[:, 0] = f2                         # Dirichlet condition
-    # p[:, -1] = f4                        # Dirichlet condition
-    # p[0, :] = f1                     # Dirichlet condition
-    # p[-1, :] = f3               # Dirichlet condition
-
-    p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
-    p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
-    p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
-    p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
-    p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
-    p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
-    p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
-    p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
-
-    # is convergence
-    e = np.abs(p - pn).max()
-    if e < 1e-10:
-        print(it)
-        break
-
-end = time.time()
-print("Cost time: {}".format(end - start))
-
-# print(p)
-print(e)
-
-# compute error
-# error = np.max(np.abs(p - u))
-error = np.sqrt(np.sum(np.square(p - u)) / (nx*ny))
-print("Error: {}".format(error))
+# p[0, 0] = (f[0, 0] * dx * dx + p[0, 1] + p[1, 0] - g1[0] * dy - g2[0] * dx) * 2 / (4 + mu*dx * dx)
+# p[0, -1] = (f[0, -1] * dx * dx + p[1, -1] + p[0, -2] - g1[-1] * dy + g4[0] * dx) * 2 / (4 + mu*dx * dx)
+# p[-1, 0] = (f[-1, 0] * dx * dx + p[-1, 1] + p[-2, 0] - g2[-1] * dx + g3[0] * dy) * 2 / (4 + mu*dx * dx)
+# p[-1, -1] = (f[-1, -1] * dx * dx + p[-1, -2] + p[-2, -1] + g3[-1] * dy + g4[-1] * dx) * 2 / (4 + mu*dx * dx)
+# p[1:-1, 0] = (f[1:-1, 0] * dx * dx + 2 * p[1:-1, 1] + p[:-2, 0] + p[2:, 0] - 2 * g2[1:-1] * dx) / (4 + mu*dx * dx)                   # Neumann condition
+# p[1:-1, -1] = (f[1:-1, -1] * dx * dx + 2 * p[1:-1, -2] + p[:-2, -1] + p[2:, -1] + 2 * g4[1:-1] * dx) / (4 + mu*dx * dx)               # Neumann condition
+# p[0, 1:-1] = (f[0, 1:-1] * dy * dy + 2 * p[1, 1:-1] + p[0, :-2] + p[0, 2:] - 2 * g1[1:-1] * dy) / (4 + mu*dx * dx)                   # Neumann condition
+# p[-1, 1:-1] = (f[-1, 1:-1] * dy * dy + 2 * p[-2, 1:-1] + p[-1, :-2] + p[-1, 2:] + 2 * g3[1:-1] * dy) / (4 + mu*dx * dx)               # Neumann condition
 
 
-# Plot the solution
-fig = plt.figure()      # Define new 3D coordinate system
-ax = plt.axes(projection='3d')
+def initial():
+    r"""
+    Initialize the x.
+    """
+    x = np.zeros(ny*nx)
+    return x
 
-x, y = np.meshgrid(x, y)
-ax.plot_surface(x, y, u, cmap='rainbow')            # plot u
-ax.plot_surface(x, y, p, cmap='rainbow')            # plot p
-# ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
-plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
-ax.set_xlabel("Spatial co-ordinate (x) ")
-ax.set_ylabel(" Spatial co-ordinate (y)")
-ax.set_zlabel("Solution profile (P) ")
-plt.show()
+def coefficient_mat():
+    r"""
+    Construct the coefficient matrix and b.
+    """
+    A = np.zeros((ny*nx, nx*ny), dtype=np.float)
+    b = np.zeros(ny*nx, dtype=np.float)
+    
+    ## construct A
+    # Build B
+    # B = np.zeros((ny, nx))
+    r = 0.5*(4 + mu*dx*dx) * np.ones(nx)
+    r1 = -np.ones(nx-1)
+    B = np.diag(r, 0) + np.diag(r1, 1) + np.diag(r1, -1)
+    B[0, 1] = -2
+    B[-1, -2] = -2
+    # Build I
+    I = np.eye(nx)
+    # Build A
+    A = np.kron(B, I) + np.kron(I, B)
+
+    ## Construct b(b = h^2 * f + 2 * h * g)
+    # Build f
+    f = np.reshape(F, nx*ny)
+    # Build g
+    g = np.reshape(G, nx*ny)
+    # Build b
+    b = dx*dx*f + 2*dx*g
+    
+    return A, b
+
+
+def cg(A, b, x):
+    r"""
+    Conjugate gradient method.
+    Input:
+        A: coefficient matrix
+        b: right hand side
+        x: the initial x
+    Output:
+        x: result of the linear equations Ax = b
+    """
+    r = b - np.dot(A, x)        # r = b-Ax
+    p = np.copy(r)
+    it = 0
+    while np.max(np.abs(r)) > 1e-10 and it < niter:
+        q = np.dot(A, p)
+        pap = np.inner(p, q)
+        if pap == 0:
+            print("pap")
+            print("iter: {}".format(it))
+            print("e={}".format(np.max(np.abs(r))))
+            return x
+        alpha = np.inner(r, r) / pap
+        r1 = r - alpha * q
+        beta = np.inner(r1, r1) / np.inner(r, r)
+        x1 = x + alpha * p
+        p1 = r1 + beta * p
+        r = r1
+        p = p1
+        x = x1
+        it += 1
+
+    print("iter:{}".format(it))
+    print("e={}".format(np.max(np.abs(r))))
+
+    return x
+
+
+def compute_error():
+    # compute error
+    error = np.max(np.abs(Un - U))
+    # error = np.sqrt(np.sum(np.square(Un - U)) / (nx*ny))
+    print("Error: {}".format(error))
+
+
+def plot():
+    global x, y
+    # Plot the solution
+    fig = plt.figure()      # Define new 3D coordinate system
+    ax = plt.axes(projection='3d')
+
+    x, y = np.meshgrid(x, y)
+    ax.plot_surface(x, y, U, cmap='rainbow')            # plot u
+    ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
+    # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
+
+    plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
+    ax.set_xlabel("Spatial co-ordinate (x) ")
+    ax.set_ylabel(" Spatial co-ordinate (y)")
+    ax.set_zlabel("Solution profile (P) ")
+    plt.show()
+
+
+def main():
+    start = time.time()
+
+    A, b = coefficient_mat()    # Get A, b
+    xx = initial()               # initial x
+    ans = cg(A, b, xx)           # solve this linear system
+
+    Un = np.reshape(ans, (ny, nx))
+
+    end = time.time()
+    print("Cost time: {}".format(end - start))
+
+    compute_error()             # compute error
+
+    plot()                      # plot the solution
+
+    # print("x = {}".format(ans))
+
+
+if __name__ == '__main__':
+    main()
 

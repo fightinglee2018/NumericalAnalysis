@@ -15,7 +15,7 @@ def cg(A, b, x):
     Input:
         A: coefficient matrix
         b: right hand side
-        x: the inital x
+        x: the initial x
     Output:
         x: result of the linear equations Ax = b
     """
