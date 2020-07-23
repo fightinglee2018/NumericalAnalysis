@@ -25,8 +25,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # global parameters
-nx = 40                               # Number of steps in space(x)
-ny = 40                               # Number of steps in space(y)
+nx = 100                               # Number of steps in space(x)
+ny = 100                               # Number of steps in space(y)
 max_iter = 1e5
 niter = max_iter                         # Number of iterations 
 dx = 1.0 / (nx - 1)                   # Width of space step(x)
@@ -35,10 +35,10 @@ x = np.linspace(0, 1, nx)             # Range of x(0,2) and specifying the grid 
 y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid points
 # print(dx)
 
-mu = 1.0
+mu = 3.0
 F = np.zeros((ny, nx))
 for i in range(ny):
-        F[i, :] = 3 * np.sin(x + y[i])
+        F[i, :] = 5 * np.sin(x + y[i])
         # F[i, j] = 20 * np.cos(3*np.pi*x[j]) * np.sin(2*np.pi*y[i])
 
 # F[0, 0] = 2*F[0, 0]
@@ -185,7 +185,7 @@ def cg(A, b, x):
     r = b - np.dot(A, x)        # r = b-Ax
     p = np.copy(r)
     it = 0
-    while np.max(np.abs(r)) > 1e-16 and it < max_iter:
+    while np.max(np.abs(r)) > 1e-3 and it < max_iter:
         q = np.dot(A, p)
         pap = np.inner(p, q)
         if pap == 0:
@@ -204,7 +204,8 @@ def cg(A, b, x):
         it += 1
 
     print("iter:{}".format(it))
-    print("e={}".format(np.max(np.abs(r))))
+    # print("e={}".format(np.max(np.abs(r))))
+    print("U_(n+1) - U_n: {}".format(np.max(np.abs(r))))
 
     return x
 
@@ -226,7 +227,7 @@ def plot(Un, ttt):
     ax.plot_surface(x, y, U, cmap='rainbow')            # plot u
     ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
     # ax.plot_surface(x, y, ttt, cmap='rainbow')            # plot ttt
-    # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
+    # ax.plot_surface(x, y, Un-U, cmap='rainbow')            # plot error
 
     plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
     ax.set_xlabel("Spatial co-ordinate (x) ")

@@ -25,20 +25,20 @@ from mpl_toolkits.mplot3d import Axes3D
 # start = time.time()
 
 # global parameters
-nx = 20                               # Number of steps in space(x)
-ny = 20                               # Number of steps in space(y)
-niter = 10000                         # Number of iterations 
+nx = 100                               # Number of steps in space(x)
+ny = 100                               # Number of steps in space(y)
+niter = 100000                         # Number of iterations 
 dx = 1.0 / (nx - 1)                   # Width of space step(x)
 dy = 1.0 / (ny - 1)                   # Width of space step(x)
 x = np.linspace(0, 1, nx)             # Range of x(0,2) and specifying the grid points
 y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid points
 # print(dx)
 
-mu = 1.0
+mu = 3.0
 f = np.zeros((ny, nx))
 for i in range(ny):
     for j in range(nx):
-        f[i, j] = 3 * np.sin(x[j] + y[i])
+        f[i, j] = 5 * np.sin(x[j] + y[i])
 f1 = np.sin(x)
 f2 = np.sin(y)
 f3 = np.sin(x+1)
@@ -106,15 +106,15 @@ for it in range(niter):
 
     # is convergence
     e = np.abs(p - pn).max()
-    if e < 1e-10:
-        print(it)
+    if e < 5*1e-7:
+        print("iter: {}".format(it))
         break
 
 end = time.time()
 print("Cost time: {}".format(end - start))
 
 # print(p)
-print(e)
+print("U_(n+1) - U_n: {}".format(e))
 
 # compute error
 # error = np.max(np.abs(p - u))
