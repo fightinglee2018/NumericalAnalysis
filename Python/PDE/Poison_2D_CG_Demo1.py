@@ -19,6 +19,7 @@ exact solution:
 
 import time
 import numpy as np
+# import linalg
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -46,8 +47,8 @@ for i in range(ny):
 # f3 = np.sin(x+1)
 # f4 = np.sin(y+1)
 
-g1 = np.cos(x)
-g2 = np.cos(y)
+g1 = -np.cos(x)
+g2 = -np.cos(y)
 g3 = np.cos(x+1)
 g4 = np.cos(y+1)
 
@@ -56,6 +57,12 @@ G[0, :] = np.cos(x)
 G[:, 0] = np.cos(y)
 G[-1, :] = np.cos(x+1)
 G[:, -1] = np.cos(y+1)
+# G[0, 0] = 2*G[0, 0]
+# G[0, -1] = 2*G[0, -1]
+# G[-1, 0] = 2*G[-1, 0]
+# G[-1, -1] = 2*G[-1, -1]
+
+# print(G)
 
 # exact solution
 U = np.zeros((ny, nx))
@@ -63,11 +70,15 @@ for i in range(ny):
     U[i, :] = np.sin(x + y[i])
 
 
+# 
+ttt = np.zeros((ny, nx))
+
+
 # Inital Conditions
 Un = np.zeros((ny, nx))
 # Pn = np.zeros((ny, nx))
 
-un = np.reshape(Un, (nx*ny,))
+un = np.reshape(np.transpose(Un), (nx*ny,))
 
 # Boundary Conditions
 # p[:, 0] = f2                         # Dirichlet condition
@@ -112,14 +123,25 @@ def coefficient_mat():
     I = np.eye(nx)
     # Build A
     A = np.kron(B, I) + np.kron(I, B)
+    # Fix some values on boundary
+    # A[0, ]
+    # idx = np.arange(ny, (nx-1)*ny, ny)
+    # A[idx, idx-1] = 0
+    # A[idx, idx+1] = -2
+    # idx = np.arange(2*ny-1, nx*ny-1, ny)
+    # A[idx, idx+1] = 0
+    # A[idx, idx-1] = -2
+
+    # print(A)
 
     ## Construct b(b = h^2 * f + 2 * h * g)
     # Build f
-    f = np.reshape(F, nx*ny)
+    f = np.reshape(np.transpose(F), nx*ny)
     # Build g
-    g = np.reshape(G, nx*ny)
+    g = np.reshape(np.transpose(G), nx*ny)
     # Build b
-    b = dx*dx*f + 2*dx*g
+    # b = dx*dx*f + 2*dx*g
+    b = dx*dx*f + g*dx
     
     return A, b
 
@@ -168,7 +190,7 @@ def compute_error():
     print("Error: {}".format(error))
 
 
-def plot():
+def plot(Un, ttt):
     global x, y
     # Plot the solution
     fig = plt.figure()      # Define new 3D coordinate system
@@ -176,7 +198,8 @@ def plot():
 
     x, y = np.meshgrid(x, y)
     ax.plot_surface(x, y, U, cmap='rainbow')            # plot u
-    ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
+    # ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
+    ax.plot_surface(x, y, ttt, cmap='rainbow')            # plot ttt
     # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
     plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
@@ -193,14 +216,26 @@ def main():
     xx = initial()               # initial x
     ans = cg(A, b, xx)           # solve this linear system
 
-    Un = np.reshape(ans, (ny, nx))
+    Un = np.transpose(np.reshape(ans, (ny, nx)))
 
     end = time.time()
     print("Cost time: {}".format(end - start))
 
+    # Direct method
+    tt = np.dot(np.linalg.inv(A), b)
+    ttt = np.reshape(np.transpose(tt), (ny, nx))
+    # print(tt)
+
+    # print(ttt)
+    # print(Un)
+
+    eee = np.sum(np.abs(Un - ttt)) / (ny*nx)
+    print("eee = {}".format(eee))
+
+
     compute_error()             # compute error
 
-    plot()                      # plot the solution
+    plot(Un, ttt)                      # plot the solution
 
     # print("x = {}".format(ans))
 
