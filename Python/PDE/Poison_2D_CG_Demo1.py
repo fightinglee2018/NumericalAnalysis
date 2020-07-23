@@ -25,9 +25,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # global parameters
-nx = 20                               # Number of steps in space(x)
-ny = 20                               # Number of steps in space(y)
-niter = 10000                         # Number of iterations 
+nx = 40                               # Number of steps in space(x)
+ny = 40                               # Number of steps in space(y)
+max_iter = 1e5
+niter = max_iter                         # Number of iterations 
 dx = 1.0 / (nx - 1)                   # Width of space step(x)
 dy = 1.0 / (ny - 1)                   # Width of space step(x)
 x = np.linspace(0, 1, nx)             # Range of x(0,2) and specifying the grid points
@@ -37,8 +38,13 @@ y = np.linspace(0, 1, ny)             # Range of x(0,2) and specifying the grid 
 mu = 1.0
 F = np.zeros((ny, nx))
 for i in range(ny):
-    for j in range(nx):
-        F[i, j] = 3 * np.sin(x[j] + y[i])
+        F[i, :] = 3 * np.sin(x + y[i])
+        # F[i, j] = 20 * np.cos(3*np.pi*x[j]) * np.sin(2*np.pi*y[i])
+
+# F[0, 0] = 2*F[0, 0]
+# F[0,-1] = 2*F[0, -1]
+# F[-1, 0] = 2*F[-1, 0]
+# F[-1, -1] = 2*F[-1, -1]
 
 # f = np.reshape(F, (nx*ny,))
 
@@ -47,20 +53,29 @@ for i in range(ny):
 # f3 = np.sin(x+1)
 # f4 = np.sin(y+1)
 
-g1 = -np.cos(x)
-g2 = -np.cos(y)
-g3 = np.cos(x+1)
-g4 = np.cos(y+1)
+# g1 = -np.cos(x)
+# g2 = -np.cos(y)
+# g3 = np.cos(x+1)
+# g4 = np.cos(y+1)
 
 G = np.zeros((ny, nx))
-G[0, :] = np.cos(x)
-G[:, 0] = np.cos(y)
+# G[0, 1:-1] = -np.cos(x[1:-1])
+# G[1:-1, 0] = -np.cos(y[1:-1])
+# G[-1, 1:-1] = np.cos(x[1:-1]+1)
+# G[1:-1, -1] = np.cos(y[1:-1]+1)
+# G[0, 0] = -(G[0, 1] + G[1, 0])
+# G[0, -1] = (G[1, -1] - G[0, -2])
+# G[-1, 0] = (G[-1, 1] - G[-2, 0])
+# G[-1, -1] = (G[-1, -2] + G[-2, -1])
+
+G[0, :] = -np.cos(x)
+G[:, 0] = -np.cos(y)
 G[-1, :] = np.cos(x+1)
 G[:, -1] = np.cos(y+1)
-# G[0, 0] = 2*G[0, 0]
-# G[0, -1] = 2*G[0, -1]
-# G[-1, 0] = 2*G[-1, 0]
-# G[-1, -1] = 2*G[-1, -1]
+G[0, 0] = 2*G[0, 0]
+G[0, -1] = 2*G[0, -1]
+G[-1, 0] = 2*G[-1, 0]
+G[-1, -1] = 2*G[-1, -1]
 
 # print(G)
 
@@ -124,7 +139,18 @@ def coefficient_mat():
     # Build A
     A = np.kron(B, I) + np.kron(I, B)
     # Fix some values on boundary
-    # A[0, ]
+    # A[0, 0] = A[0, 0] / 2
+    # A[0, 1] = -1
+    # A[0, ny] = -1
+    # A[ny-1, ny-1] = A[ny-1, ny-1] / 2
+    # A[ny-1, ny-2] = -1
+    # A[ny-1, 2*ny-1] = -1
+    # A[-ny, -ny] = A[-ny, -ny] / 2
+    # A[-ny, -(ny-1)] = -1
+    # A[-ny, -2*ny] = -1
+    # A[-1, -1] = A[-1, -1] / 2
+    # A[-1, -2] = -1
+    # A[-1, -(ny+1)] = -1
     # idx = np.arange(ny, (nx-1)*ny, ny)
     # A[idx, idx-1] = 0
     # A[idx, idx+1] = -2
@@ -140,8 +166,8 @@ def coefficient_mat():
     # Build g
     g = np.reshape(np.transpose(G), nx*ny)
     # Build b
-    # b = dx*dx*f + 2*dx*g
-    b = dx*dx*f + g*dx
+    b = dx*dx*f + 2*dx*g
+    # b = dx*dx*f + g*dx
     
     return A, b
 
@@ -159,7 +185,7 @@ def cg(A, b, x):
     r = b - np.dot(A, x)        # r = b-Ax
     p = np.copy(r)
     it = 0
-    while np.max(np.abs(r)) > 1e-10 and it < niter:
+    while np.max(np.abs(r)) > 1e-16 and it < max_iter:
         q = np.dot(A, p)
         pap = np.inner(p, q)
         if pap == 0:
@@ -183,10 +209,10 @@ def cg(A, b, x):
     return x
 
 
-def compute_error():
+def compute_error(Un):
     # compute error
-    error = np.max(np.abs(Un - U))
-    # error = np.sqrt(np.sum(np.square(Un - U)) / (nx*ny))
+    # error = np.max(np.abs(Un - U))
+    error = np.sqrt(np.sum(np.square(Un - U)) / (nx*ny))
     print("Error: {}".format(error))
 
 
@@ -198,8 +224,8 @@ def plot(Un, ttt):
 
     x, y = np.meshgrid(x, y)
     ax.plot_surface(x, y, U, cmap='rainbow')            # plot u
-    # ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
-    ax.plot_surface(x, y, ttt, cmap='rainbow')            # plot ttt
+    ax.plot_surface(x, y, Un, cmap='rainbow')            # plot p
+    # ax.plot_surface(x, y, ttt, cmap='rainbow')            # plot ttt
     # ax.plot_surface(x, y, p-u, cmap='rainbow')            # plot error
 
     plt.title("2-D Laplace equation; Number of iterations {}".format(niter))
@@ -222,18 +248,18 @@ def main():
     print("Cost time: {}".format(end - start))
 
     # Direct method
-    tt = np.dot(np.linalg.inv(A), b)
-    ttt = np.reshape(np.transpose(tt), (ny, nx))
-    # print(tt)
+    # tt = np.dot(np.linalg.inv(A), b)
+    # ttt = np.reshape(np.transpose(tt), (ny, nx))
+    # # print(tt)
 
-    # print(ttt)
-    # print(Un)
+    # # print(ttt)
+    # # print(Un)
 
-    eee = np.sum(np.abs(Un - ttt)) / (ny*nx)
-    print("eee = {}".format(eee))
+    # eee = np.sum(np.abs(Un - ttt)) / (ny*nx)
+    # print("eee = {}".format(eee))
 
 
-    compute_error()             # compute error
+    compute_error(Un)             # compute error
 
     plot(Un, ttt)                      # plot the solution
 
