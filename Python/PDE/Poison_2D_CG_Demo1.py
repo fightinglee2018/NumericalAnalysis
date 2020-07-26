@@ -63,10 +63,10 @@ G = np.zeros((ny, nx))
 # G[1:-1, 0] = -np.cos(y[1:-1])
 # G[-1, 1:-1] = np.cos(x[1:-1]+1)
 # G[1:-1, -1] = np.cos(y[1:-1]+1)
-# G[0, 0] = -(G[0, 1] + G[1, 0])
-# G[0, -1] = (G[1, -1] - G[0, -2])
-# G[-1, 0] = (G[-1, 1] - G[-2, 0])
-# G[-1, -1] = (G[-1, -2] + G[-2, -1])
+# G[0, 0] = G[0, 1] + G[1, 0]
+# G[0, -1] = G[1, -1] + G[0, -2]
+# G[-1, 0] = G[-1, 1] + G[-2, 0]
+# G[-1, -1] = G[-1, -2] + G[-2, -1]
 
 G[0, :] = -np.cos(x)
 G[:, 0] = -np.cos(y)
@@ -259,7 +259,7 @@ def main():
     # eee = np.sum(np.abs(Un - ttt)) / (ny*nx)
     # print("eee = {}".format(eee))
 
-
+    # compute_error(ttt)
     compute_error(Un)             # compute error
 
     plot(Un, ttt)                      # plot the solution
